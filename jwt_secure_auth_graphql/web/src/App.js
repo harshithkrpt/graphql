@@ -8,6 +8,7 @@ import Home from "./Home";
 import Private from "./Private";
 import { useState } from "react";
 import { setAccessToken, accessToken } from "./accessToken";
+import Logout from "./Logout";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -35,6 +36,7 @@ function App() {
         <Link to="/register">Register</Link>
         <Link to="/login">Login</Link>
         <Link to="/private">Private</Link>
+        <Logout />
       </div>
       <Switch>
         <Route exact path="/" component={Home} />

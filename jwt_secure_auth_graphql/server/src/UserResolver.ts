@@ -69,6 +69,13 @@ export class UserResolver {
     return true;
   }
 
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async logout(@Ctx() { res }: MyContext) {
+    sendRefreshToken(res, "");
+    return true;
+  }
+
   @Mutation(() => LoginResponse)
   async login(
     @Arg("email") email: string,

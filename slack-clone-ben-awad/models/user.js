@@ -1,3 +1,5 @@
+const bcrypt = require("bcryptjs");
+
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
     "user",
@@ -24,9 +26,22 @@ module.exports = (sequelize, DataTypes) => {
       },
       password: {
         type: DataTypes.STRING,
+        validate: {
+          len: {
+            args: [5, 100],
+            msg: "Password must be between 5 and 100",
+          },
+        },
       },
     },
-    { timestamps: false }
+    {
+      timestamps: false,
+      hooks: {
+        afterValidate: async (user) => {
+          user.password = await bcrypt.hash(user.password, 12);
+        },
+      },
+    }
   );
 
   User.associate = (models) => {

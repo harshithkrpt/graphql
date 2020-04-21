@@ -10,25 +10,28 @@ import { useQuery } from "@apollo/react-hooks";
 
 const MessageContainer = ({ channelId }) => {
   const { data, loading, subscribeToMore } = useQuery(MESSAGES_QUERY, {
+    fetchPolicy: "network-only",
     variables: { channelId },
   });
 
   useEffect(() => {
-    const unsuscribe = subscribeToMore({
+    const unsubscribe = subscribeToMore({
       document: CREATE_NEW_MESSAGE_SUBSCRIPTION,
       variables: { channelId },
       updateQuery: (prev, { subscriptionData }) => {
         if (!subscriptionData) {
           return prev;
         }
-        console.log(subscriptionData);
+
         return {
           ...prev,
           messages: [...prev.messages, subscriptionData.data.newChannelMessage],
         };
       },
     });
-    return () => unsuscribe();
+    return () => {
+      unsubscribe();
+    };
   }, [channelId, subscribeToMore]);
 
   if (loading) {

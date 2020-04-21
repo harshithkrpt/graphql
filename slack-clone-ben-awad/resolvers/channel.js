@@ -6,11 +6,11 @@ module.exports = {
     createChannel: requiresAuth.createResolver(
       async (_, args, { models, user }) => {
         try {
-          const team = await models.Team.findOne(
-            { where: { id: args.teamId } },
+          const member = await models.Member.findOne(
+            { where: { userId: user.id, teamId: args.teamId } },
             { raw: true }
           );
-          if (team.owner !== user.id) {
+          if (!member.admin) {
             return {
               ok: false,
               errors: [

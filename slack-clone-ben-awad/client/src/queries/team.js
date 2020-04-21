@@ -15,24 +15,19 @@ export const CREATETEAM = gql`
   }
 `;
 
-export const GETALLTEAMS = gql`
+export const ME_QUERY = gql`
   query {
-    allTeams {
+    me {
       id
-      owner
-      name
-      channels {
+      username
+      teams {
         id
         name
-      }
-    }
-    inviteTeams {
-      id
-      owner
-      name
-      channels {
-        id
-        name
+        admin
+        channels {
+          id
+          name
+        }
       }
     }
   }

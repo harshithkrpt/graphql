@@ -2,11 +2,9 @@ import React, { useState } from "react";
 import Channels from "../components/Channels";
 import Teams from "../components/Teams";
 import AddChannelModal from "../components/AddChannelModal";
-import { getUserName } from "../utils/getUsername";
 import InvitePeopleModal from "../components/InvitePeopleModal";
-import { getUserId } from "../utils/getUserId";
 
-const Sidebar = ({ teams, team }) => {
+const Sidebar = ({ teams, team, username }) => {
   const [openAddChannelModal, setOpenAddChannelModal] = useState(false);
   const [openInvitePeopleModal, setOpenInvitePeopleModal] = useState(false);
 
@@ -18,9 +16,6 @@ const Sidebar = ({ teams, team }) => {
     setOpenInvitePeopleModal(!openInvitePeopleModal);
   };
 
-  const username = getUserName();
-  const userId = getUserId();
-
   return (
     <>
       <Teams teams={teams} />
@@ -30,7 +25,7 @@ const Sidebar = ({ teams, team }) => {
         teamId={team.id}
         owner={team.owner}
         channels={team.channels}
-        isOwner={userId === team.owner}
+        isOwner={team.admin}
         users={[
           { id: 1, name: "slack" },
           { id: 2, name: "user1" },

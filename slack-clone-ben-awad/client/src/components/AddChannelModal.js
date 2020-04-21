@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Button, Input, Form } from "semantic-ui-react";
 
-import { CREATECHANNEL, GETALLTEAMS } from "../queries/team";
+import { CREATECHANNEL, ME_QUERY } from "../queries/team";
 import { useMutation } from "@apollo/react-hooks";
 import findIndex from "lodash/findIndex";
 
@@ -31,10 +31,10 @@ const AddChannelModal = ({ open, onClose, teamId }) => {
         if (!ok) {
           return;
         }
-        const data = store.readQuery({ query: GETALLTEAMS });
-        const teamIdx = findIndex(data.allTeams, ["id", teamId]);
-        data.allTeams[teamIdx].channels.push(channel);
-        store.writeQuery({ query: GETALLTEAMS, data });
+        const data = store.readQuery({ query: ME_QUERY });
+        const teamIdx = findIndex(data.me.teams, ["id", teamId]);
+        data.me.teams[teamIdx].channels.push(channel);
+        store.writeQuery({ query: ME_QUERY, data });
       },
     });
     setName("");

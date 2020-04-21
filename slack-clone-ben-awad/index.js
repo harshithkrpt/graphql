@@ -30,10 +30,10 @@ const PORT = 8080;
 
 const addUser = async (req, res, next) => {
   const token = req.headers["x-token"];
-
   if (token) {
     try {
       const { user } = jwt.verify(token, SECRET);
+
       req.user = user;
     } catch (e) {
       const refreshToken = req.headers["x-refresh-token"];
@@ -89,6 +89,24 @@ models.sequelize.sync().then(() => {
         execute,
         subscribe,
         schema,
+        onConnect: async ({ token, refreshToken }, webSocket) => {
+          if (token && refreshToken) {
+            try {
+              const { user } = jwt.verify(token, SECRET);
+              return { models, user };
+            } catch (e) {
+              const { user } = await refreshTokens(
+                token,
+                refreshToken,
+                models,
+                SECRET,
+                SECRET2
+              );
+              return { models, user };
+            }
+          }
+          return { models };
+        },
       },
       {
         server: server,

@@ -1,26 +1,27 @@
 import React from "react";
 import findIndex from "lodash/findIndex";
-import { useQuery, useMutation } from "@apollo/react-hooks";
-import { Redirect } from "react-router-dom";
-// Components
+// Componenents
 import Header from "../components/Header";
 import SendMessage from "../components/SendMessage";
 import AppLayout from "../components/AppLayout";
 // Containers
+import DirectMessageContainer from "./DirectMessageContainer";
 import Sidebar from "../containers/Sidebar";
-import MessageContainer from "../containers/MessageContainer";
 // Queries
 import { ME_QUERY } from "../queries/team";
-import { CREATE_MESSAGE_MUTATION } from "../queries/user";
+import { Redirect } from "react-router-dom";
+import { useQuery, useMutation } from "@apollo/react-hooks";
+import { CREATE_DIRECT_MESSAGE_MUTATION } from "../queries/user";
 
-const ViewTeam = ({
+// THIS
+const DirectMessage = ({
   match: {
-    params: { teamId, channelId },
+    params: { teamId, userId },
   },
 }) => {
   const { data, loading } = useQuery(ME_QUERY, { fetchPolicy: "network-only" });
-  const [createMessage, createMessageInfo] = useMutation(
-    CREATE_MESSAGE_MUTATION
+  const [createDirectMessage, createDirectMessageInfo] = useMutation(
+    CREATE_DIRECT_MESSAGE_MUTATION
   );
   if (loading) {
     return null;
@@ -32,20 +33,21 @@ const ViewTeam = ({
   }
 
   let teamIdInteger = parseInt(teamId, 10);
-  let channelIdInteger = parseInt(channelId, 10);
 
   // To Get The Team Index That you are in
   const teamIdx = teamIdInteger ? findIndex(teams, ["id", teamIdInteger]) : 0;
   // Get the Team
   const team = teamIdx === -1 ? teams[0] : teams[teamIdx];
   // GET Current Channel or default Channel
-  const channelIdx = channelIdInteger
-    ? findIndex(team.channels, ["id", channelIdInteger])
-    : 0;
-  const channel = teamIdx === -1 ? team.channels[0] : team.channels[channelIdx];
 
   const handleSubmit = async (text) => {
-    await createMessage({ variables: { text, channelId: channel.id } });
+    await createDirectMessage({
+      variables: {
+        receiverId: parseInt(userId, 10),
+        text,
+        teamId: parseInt(teamId, 10),
+      },
+    });
   };
 
   return (
@@ -59,16 +61,15 @@ const ViewTeam = ({
         team={team}
         username={username}
       />
-      {channel && <Header channelName={channel.name} />}
-      {channel && <MessageContainer channelId={channel.id} />}
-
+      <Header channelName={"Some Ones User Name"} />
+      <DirectMessageContainer teamId={teamId} userId={userId} />
       <SendMessage
-        isLoading={createMessageInfo.loading}
+        isLoading={createDirectMessageInfo.loading}
         onSubmit={handleSubmit}
-        placeholder={channel.name}
+        placeholder={userId}
       />
     </AppLayout>
   );
 };
 
-export default ViewTeam;
+export default DirectMessage;

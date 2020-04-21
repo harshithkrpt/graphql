@@ -31,6 +31,12 @@ export const CREATE_MESSAGE_MUTATION = gql`
   }
 `;
 
+export const CREATE_DIRECT_MESSAGE_MUTATION = gql`
+  mutation($receiverId: Int!, $text: String!, $teamId: Int!) {
+    createDirectMessage(receiverId: $receiverId, text: $text, teamId: $teamId)
+  }
+`;
+
 export const MESSAGES_QUERY = gql`
   query($channelId: Int!) {
     messages(channelId: $channelId) {
@@ -39,6 +45,19 @@ export const MESSAGES_QUERY = gql`
       user {
         username
       }
+      createdAt
+    }
+  }
+`;
+
+export const DIRECT_MESSAGE_QUERY = gql`
+  query($teamId: Int!, $otherUserId: Int!) {
+    directMessages(teamId: $teamId, otherUserId: $otherUserId) {
+      id
+      sender {
+        username
+      }
+      text
       createdAt
     }
   }

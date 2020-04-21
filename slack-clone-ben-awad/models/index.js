@@ -19,6 +19,7 @@ const models = {
   Message: sequelize.import("./message"),
   Team: sequelize.import("./team"),
   Member: sequelize.import("./member"),
+  DirectMessage: sequelize.import("./directMessage"),
 };
 
 // For Foreign Key Linkage

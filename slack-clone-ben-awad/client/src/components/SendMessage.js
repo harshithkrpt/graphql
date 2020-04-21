@@ -2,9 +2,6 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { Input } from "semantic-ui-react";
 
-import { CREATE_MESSAGE_MUTATION } from "../queries/user";
-import { useMutation } from "@apollo/react-hooks";
-
 const SendMessageWrapper = styled.div`
   grid-column: 3;
   grid-row: 3;
@@ -12,9 +9,9 @@ const SendMessageWrapper = styled.div`
   padding: 20px;
 `;
 
-const SendMessage = ({ channelName, channelId }) => {
+const SendMessage = ({ onSubmit, placeholder, isLoading }) => {
   const [message, setMessage] = useState("");
-  const [createMessage, { loading }] = useMutation(CREATE_MESSAGE_MUTATION);
+
   const handleChange = (e) => {
     setMessage(e.target.value);
   };
@@ -25,7 +22,7 @@ const SendMessage = ({ channelName, channelId }) => {
       return;
     }
 
-    await createMessage({ variables: { text: message, channelId } });
+    await onSubmit(message);
     setMessage("");
   };
 
@@ -33,13 +30,13 @@ const SendMessage = ({ channelName, channelId }) => {
     <SendMessageWrapper>
       <Input
         onKeyDown={(e) => {
-          if (e.keyCode === 13 && !loading) {
+          if (e.keyCode === 13 && !isLoading) {
             handleSubmit(e);
           }
         }}
         value={message}
         fluid
-        placeholder={`# ${channelName}`}
+        placeholder={placeholder}
         onChange={handleChange}
       />
     </SendMessageWrapper>

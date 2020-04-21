@@ -1,4 +1,4 @@
-const { requiresAuth } = require("../permissions");
+const { requiresAuth, requiresTeamAccess } = require("../permissions");
 const { PubSub, withFilter } = require("graphql-subscriptions");
 
 const pubsub = new PubSub();
@@ -8,9 +8,11 @@ const NEW_CHANNEL_MESSAGE = "NEW_CHANNEL_MESSAGE";
 module.exports = {
   Subscription: {
     newChannelMessage: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterator(NEW_CHANNEL_MESSAGE),
-        (payload, args) => payload.channelId === args.channelId
+      subscribe: requiresTeamAccess.createResolver(
+        withFilter(
+          () => pubsub.asyncIterator(NEW_CHANNEL_MESSAGE),
+          (payload, args) => payload.channelId === args.channelId
+        )
       ),
     },
   },

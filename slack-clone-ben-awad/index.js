@@ -3,14 +3,20 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
 const jwt = require("jsonwebtoken");
+const { makeExecutableSchema } = require("graphql-tools");
+
 const {
   fileLoader,
   mergeTypes,
   mergeResolvers,
 } = require("merge-graphql-schemas");
 const { ApolloServer } = require("apollo-server-express");
-const { refreshTokens } = require("./utils/auth");
+const { createServer } = require("http");
+const { execute, subscribe } = require("graphql");
+const { PubSub } = require("graphql-subscriptions");
+const { SubscriptionServer } = require("subscriptions-transport-ws");
 
+const { refreshTokens } = require("./utils/auth");
 const models = require("./models");
 
 const app = express();
@@ -20,6 +26,7 @@ app.use(bodyParser.json());
 
 const SECRET = "jaiodnbosdcaol-6wqyhauo";
 const SECRET2 = "jsodogusabxzgfygsajhvz";
+const PORT = 8080;
 
 const addUser = async (req, res, next) => {
   const token = req.headers["x-token"];
@@ -59,18 +66,34 @@ const resolvers = mergeResolvers(
   fileLoader(path.join(__dirname, "./resolvers"))
 );
 
-const server = new ApolloServer({
+const schema = makeExecutableSchema({
   typeDefs,
   resolvers,
+});
+
+const apollo = new ApolloServer({
+  schema,
   context: ({ req }) => {
     return { models, user: req.user, SECRET, SECRET2 };
   },
 });
 
-server.applyMiddleware({ app, cors: false });
+apollo.applyMiddleware({ app, cors: false });
+
+const server = createServer(app);
 
 models.sequelize.sync().then(() => {
-  app.listen(8080, () => {
-    console.log("Server Started on 8080");
+  server.listen(PORT, () => {
+    new SubscriptionServer(
+      {
+        execute,
+        subscribe,
+        schema,
+      },
+      {
+        server: server,
+        path: "/subscriptions",
+      }
+    );
   });
 });

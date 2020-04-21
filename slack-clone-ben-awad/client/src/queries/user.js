@@ -24,3 +24,35 @@ export const LOGIN = gql`
     }
   }
 `;
+
+export const CREATE_MESSAGE_MUTATION = gql`
+  mutation($channelId: Int!, $text: String!) {
+    createMessage(channelId: $channelId, text: $text)
+  }
+`;
+
+export const MESSAGES_QUERY = gql`
+  query($channelId: Int!) {
+    messages(channelId: $channelId) {
+      id
+      text
+      user {
+        username
+      }
+      createdAt
+    }
+  }
+`;
+
+export const CREATE_NEW_MESSAGE_SUBSCRIPTION = gql`
+  subscription($channelId: Int!) {
+    newChannelMessage(channelId: $channelId) {
+      id
+      text
+      user {
+        username
+      }
+      createdAt
+    }
+  }
+`;

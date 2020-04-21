@@ -1,57 +1,52 @@
 import React, { useState } from "react";
 import Channels from "../components/Channels";
 import Teams from "../components/Teams";
-import { useQuery } from "@apollo/react-hooks";
-import findIndex from "lodash/findIndex";
-import { GETALLTEAMS } from "../queries/team";
-import { getUserName } from "../utils/getUsername";
 import AddChannelModal from "../components/AddChannelModal";
+import { getUserName } from "../utils/getUsername";
+import InvitePeopleModal from "../components/InvitePeopleModal";
+import { getUserId } from "../utils/getUserId";
 
-const Sidebar = ({ currentTeamId }) => {
-  const [openModal, setOpenModal] = useState(false);
-  const { data, loading } = useQuery(GETALLTEAMS);
+const Sidebar = ({ teams, team }) => {
+  const [openAddChannelModal, setOpenAddChannelModal] = useState(false);
+  const [openInvitePeopleModal, setOpenInvitePeopleModal] = useState(false);
 
-  if (loading) {
-    return "Loading";
-  }
-
-  const handleAddChannelClick = () => {
-    setOpenModal(true);
+  const toggleAddChannelModal = (e) => {
+    setOpenAddChannelModal(!openAddChannelModal);
   };
 
-  const handleCloseAddChannelClick = () => {
-    setOpenModal(false);
+  const toggleInvitePeopleModal = (e) => {
+    setOpenInvitePeopleModal(!openInvitePeopleModal);
   };
 
-  const { allTeams } = data;
-  const teamIdx = currentTeamId
-    ? findIndex(allTeams, ["id", parseInt(currentTeamId, 10)])
-    : 0;
-  const team = allTeams[teamIdx];
   const username = getUserName();
+  const userId = getUserId();
+
   return (
     <>
-      <Teams
-        teams={allTeams.map((t) => ({
-          id: t.id,
-          letter: t.name.charAt(0).toUpperCase(),
-        }))}
-      />
+      <Teams teams={teams} />
       <Channels
         teamName={team.name}
         username={username}
         teamId={team.id}
+        owner={team.owner}
         channels={team.channels}
+        isOwner={userId === team.owner}
         users={[
           { id: 1, name: "slack" },
           { id: 2, name: "user1" },
         ]}
-        onAddChannelClick={handleAddChannelClick}
+        onAddChannelClick={toggleAddChannelModal}
+        onInvitePeopleClick={toggleInvitePeopleModal}
       />
       <AddChannelModal
         teamId={team.id}
-        open={openModal}
-        onClose={handleCloseAddChannelClick}
+        open={openAddChannelModal}
+        onClose={toggleAddChannelModal}
+      />
+      <InvitePeopleModal
+        teamId={team.id}
+        open={openInvitePeopleModal}
+        onClose={toggleInvitePeopleModal}
       />
     </>
   );

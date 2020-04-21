@@ -7,10 +7,10 @@ const HeaderWraper = styled.div`
   grid-row: 1;
 `;
 
-export default (props) => {
+export default ({ channelName }) => {
   return (
     <HeaderWraper>
-      <Header textAlign="center"># channelName</Header>
+      <Header textAlign="center"># {channelName}</Header>
     </HeaderWraper>
   );
 };

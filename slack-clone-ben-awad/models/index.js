@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 
 const sequelize = new Sequelize(
-  "slack-clone-ben-awad",
+  process.env.TEST_DB || "slack-clone-ben-awad",
   "postgres",
   "postgres",
   {

@@ -2,7 +2,7 @@ import { ApolloClient } from "apollo-client";
 import { InMemoryCache } from "apollo-cache-inmemory";
 
 import { ApolloLink, from, split } from "apollo-link";
-import { HttpLink } from "apollo-link-http";
+// import { HttpLink } from "apollo-link-http";
 import { WebSocketLink } from "apollo-link-ws";
 import { getMainDefinition } from "apollo-utilities";
 
@@ -10,6 +10,7 @@ import {
   LOCAL_STORAGE_TOKEN,
   LOCAL_STORAGE_REFRESH_TOKEN,
 } from "./utils/constants";
+import createFileLink from "./createFileLink";
 
 // MiddleWare
 const authMiddleWare = new ApolloLink((operation, forward) => {
@@ -46,7 +47,7 @@ const authAfterWare = new ApolloLink((operation, forward) => {
 });
 
 // HTTP LINK
-const httpLink = new HttpLink({
+const httpLink = createFileLink({
   uri: "http://localhost:8080/graphql",
 });
 

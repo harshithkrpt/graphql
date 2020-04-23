@@ -1,7 +1,7 @@
 const { requiresAuth, requiresTeamAccess } = require("../permissions");
-const { PubSub, withFilter } = require("graphql-subscriptions");
+const { withFilter } = require("graphql-subscriptions");
 
-const pubsub = new PubSub();
+const pubsub = require("../pubsub");
 
 const NEW_CHANNEL_MESSAGE = "NEW_CHANNEL_MESSAGE";
 
@@ -20,12 +20,12 @@ module.exports = {
     user: async ({ user, userId }, args, { models }) => {
       if (user) return user;
 
-      return await models.User.findOne({ where: { id: userId } });
+      return models.User.findOne({ where: { id: userId } }, { raw: true });
     },
   },
   Query: {
     messages: requiresAuth.createResolver(
-      async (_, { channelId }, { models, user }) => {
+      async (_, { channelId }, { models }) => {
         return models.Message.findAll(
           { order: [["createdAt", "ASC"]], where: { channelId } },
           { raw: true }
@@ -35,10 +35,15 @@ module.exports = {
   },
   Mutation: {
     createMessage: requiresAuth.createResolver(
-      async (_, args, { models, user }) => {
+      async (_, { file, ...args }, { models, user }) => {
         try {
+          const messageData = args;
+          if (file) {
+            messageData.filetype = file.type;
+            messageData.url = file.path;
+          }
           const message = await models.Message.create({
-            ...args,
+            ...messageData,
             userId: user.id,
           });
           const asyncFunc = async () => {

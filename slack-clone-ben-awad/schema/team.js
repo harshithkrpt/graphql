@@ -2,7 +2,7 @@ module.exports = `
     type Team {
         id:Int!
         name: String!
-        members: [User!]!
+        directMessageMembers: [User!]!
         channels: [Channel!]!
         admin: Boolean!
     }
@@ -16,6 +16,7 @@ module.exports = `
     type Query {
         allTeams: [Team!]!
         inviteTeams: [Team!]
+        getTeamMembers(teamId:Int!): [User!]!
     }
 
     type VoidResponse {

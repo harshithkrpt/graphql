@@ -22,9 +22,19 @@ const ViewTeam = ({
   const [createMessage, createMessageInfo] = useMutation(
     CREATE_MESSAGE_MUTATION
   );
+
+  const handleSubmit = async (text) => {
+    try {
+      await createMessage({ variables: { text, channelId: channel.id } });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   if (loading) {
-    return null;
+    return "Loading";
   }
+
   const { teams, username } = data.me;
 
   if (!teams.length) {
@@ -44,30 +54,29 @@ const ViewTeam = ({
     : 0;
   const channel = teamIdx === -1 ? team.channels[0] : team.channels[channelIdx];
 
-  const handleSubmit = async (text) => {
-    await createMessage({ variables: { text, channelId: channel.id } });
-  };
-
   return (
-    <AppLayout>
-      <Sidebar
-        teams={teams.map((t) => ({
-          id: t.id,
-          letter: t.name.charAt(0).toUpperCase(),
-        }))}
-        currentTeamId={teamId}
-        team={team}
-        username={username}
-      />
-      {channel && <Header channelName={channel.name} />}
-      {channel && <MessageContainer channelId={channel.id} />}
+    !loading && (
+      <AppLayout>
+        <Sidebar
+          teams={teams.map((t) => ({
+            id: t.id,
+            letter: t.name.charAt(0).toUpperCase(),
+          }))}
+          currentTeamId={teamId}
+          team={team}
+          username={username}
+        />
+        {channel && <Header channelName={channel.name} />}
+        {channel && <MessageContainer channelId={channel.id} />}
 
-      <SendMessage
-        isLoading={createMessageInfo.loading}
-        onSubmit={handleSubmit}
-        placeholder={channel.name}
-      />
-    </AppLayout>
+        <SendMessage
+          isLoading={createMessageInfo.loading}
+          onSubmit={handleSubmit}
+          placeholder={channel.name}
+          channelId={channel.id}
+        />
+      </AppLayout>
+    )
   );
 };
 

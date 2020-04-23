@@ -44,7 +44,7 @@ const Login = (props) => {
     if (ok) {
       localStorage.setItem(LOCAL_STORAGE_TOKEN, token);
       localStorage.setItem(LOCAL_STORAGE_REFRESH_TOKEN, refreshToken);
-      props.history.push("/");
+      props.history.push("/viewteam");
     } else {
       const err = {};
       errors.forEach(({ path, message }) => {

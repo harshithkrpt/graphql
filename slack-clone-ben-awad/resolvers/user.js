@@ -18,6 +18,8 @@ module.exports = {
     },
   },
   Query: {
+    getUser: (_, { userId }, { models, user }) =>
+      models.User.findOne({ where: { id: userId } }),
     allUsers: (parent, args, { models }) => models.User.findAll(),
     me: requiresAuth.createResolver(async (parent, args, { models, user }) => {
       return await models.User.findOne({ where: { id: user.id } });

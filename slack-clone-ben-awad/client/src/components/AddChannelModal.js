@@ -41,8 +41,13 @@ const AddChannelModal = ({ open, onClose, teamId }) => {
     onClose();
   };
 
+  const handleClose = () => {
+    setName("");
+    onClose();
+  };
+
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={handleClose}>
       <Modal.Header>Add Channel</Modal.Header>
       <Modal.Content>
         <Form>
@@ -55,7 +60,7 @@ const AddChannelModal = ({ open, onClose, teamId }) => {
             />
           </Form.Field>
           <Form.Group>
-            <Button onClick={onClose} fluid>
+            <Button onClick={handleClose} fluid>
               Cancel
             </Button>
             <Button disabled={loading} onClick={handleSubmit} fluid>

@@ -9,6 +9,7 @@ module.exports = `
     type Query {
         me: User!
         allUsers: [User!]!
+        getUser(userId:Int!): User!
     }
 
     type RegisterResponse {

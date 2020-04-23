@@ -37,12 +37,14 @@ const CreateTeam = (props) => {
       res = await createTeam({ variables: { name } });
     } catch (e) {
       props.history.push("/login");
+      console.log("hn");
       return;
     }
     const { ok, errors, team } = res.data.createTeam;
 
     if (ok) {
       props.history.push(`/viewteam/${team.id}`);
+      return;
     } else {
       const err = {};
       errors.forEach(({ path, message }) => {

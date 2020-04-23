@@ -75,3 +75,25 @@ export const CREATE_NEW_MESSAGE_SUBSCRIPTION = gql`
     }
   }
 `;
+
+export const CREATE_DIRECT_MESSAGE_SUBSCRIPTION = gql`
+  subscription($teamId: Int!, $otherUserId: Int!) {
+    newDirectMessage(teamId: $teamId, userId: $otherUserId) {
+      id
+      sender {
+        username
+      }
+      text
+      createdAt
+    }
+  }
+`;
+
+export const GET_TEAM_MEMBERS_QUERY = gql`
+  query($teamId: Int!) {
+    getTeamMembers(teamId: $teamId) {
+      id
+      username
+    }
+  }
+`;

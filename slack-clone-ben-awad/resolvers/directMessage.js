@@ -1,16 +1,27 @@
-const { requiresAuth, requiresTeamAccess } = require("../permissions");
+const { requiresAuth, directMessageSubscription } = require("../permissions");
+
+const { withFilter } = require("graphql-subscriptions");
+
+const NEW_DIRECT_MESSAGE = "NEW_DIRECT_MESSAGE";
+
+const pubsub = require("../pubsub");
 
 module.exports = {
-  //   Subscription: {
-  //     newChannelMessage: {
-  //       subscribe: requiresTeamAccess.createResolver(
-  //         withFilter(
-  //           () => pubsub.asyncIterator(NEW_CHANNEL_MESSAGE),
-  //           (payload, args) => payload.channelId === args.channelId
-  //         )
-  //       ),
-  //     },
-  //   },
+  Subscription: {
+    newDirectMessage: {
+      subscribe: directMessageSubscription.createResolver(
+        withFilter(
+          () => pubsub.asyncIterator(NEW_DIRECT_MESSAGE),
+          (payload, args, { user }) =>
+            payload.teamId === args.teamId &&
+            ((payload.senderId === user.id &&
+              payload.receiverId === args.userId) ||
+              (payload.senderId === args.userId &&
+                payload.receiverId === user.id))
+        )
+      ),
+    },
+  },
   DirectMessage: {
     sender: async ({ sender, senderId }, args, { models }) => {
       if (sender) return sender;
@@ -56,25 +67,19 @@ module.exports = {
             ...args,
             senderId: user.id,
           });
-          //   const asyncFunc = async () => {
-          //     const currentUser = await models.User.findOne(
-          //       {
-          //         where: {
-          //           id: user.id,
-          //         },
-          //       },
-          //       { raw: true }
-          //     );
 
-          //     pubsub.publish(NEW_CHANNEL_MESSAGE, {
-          //       channelId: args.channelId,
-          //       newChannelMessage: {
-          //         ...message.dataValues,
-          //         user: currentUser.dataValues,
-          //       },
-          //     });
-          //   };
-          //   asyncFunc();
+          pubsub.publish(NEW_DIRECT_MESSAGE, {
+            teamId: args.teamId,
+            senderId: user.id,
+            receiverId: args.receiverId,
+            newDirectMessage: {
+              ...directMessage.dataValues,
+              sender: {
+                username: user.username,
+              },
+            },
+          });
+
           return true;
         } catch (e) {
           console.log(e);

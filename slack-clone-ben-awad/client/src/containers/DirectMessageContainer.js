@@ -4,12 +4,12 @@ import { Comment } from "semantic-ui-react";
 
 import {
   DIRECT_MESSAGE_QUERY,
-  CREATE_NEW_MESSAGE_SUBSCRIPTION,
+  CREATE_DIRECT_MESSAGE_SUBSCRIPTION,
 } from "../queries/user";
 import { useQuery } from "@apollo/react-hooks";
 
 const DirectMessageContainer = ({ teamId, userId }) => {
-  const { data, loading /*subscribeToMore*/ } = useQuery(DIRECT_MESSAGE_QUERY, {
+  const { data, loading, subscribeToMore } = useQuery(DIRECT_MESSAGE_QUERY, {
     fetchPolicy: "network-only",
     variables: {
       teamId: parseInt(teamId, 10),
@@ -17,25 +17,33 @@ const DirectMessageContainer = ({ teamId, userId }) => {
     },
   });
 
-  //   useEffect(() => {
-  //     const unsubscribe = subscribeToMore({
-  //       document: CREATE_NEW_MESSAGE_SUBSCRIPTION,
-  //       variables: { channelId },
-  //       updateQuery: (prev, { subscriptionData }) => {
-  //         if (!subscriptionData) {
-  //           return prev;
-  //         }
+  useEffect(() => {
+    console.log("Mounting Direct Message");
+    const unsubscribe = subscribeToMore({
+      document: CREATE_DIRECT_MESSAGE_SUBSCRIPTION,
+      variables: {
+        teamId: parseInt(teamId, 10),
+        otherUserId: parseInt(userId, 10),
+      },
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData) {
+          return prev;
+        }
 
-  //         return {
-  //           ...prev,
-  //           messages: [...prev.messages, subscriptionData.data.newChannelMessage],
-  //         };
-  //       },
-  //     });
-  //     return () => {
-  //       unsubscribe();
-  //     };
-  //   }, [channelId, subscribeToMore]);
+        return {
+          ...prev,
+          directMessages: [
+            ...prev.directMessages,
+            subscriptionData.data.newDirectMessage,
+          ],
+        };
+      },
+    });
+    return () => {
+      console.log("UnMounting Direct Message");
+      unsubscribe();
+    };
+  }, [teamId, userId, subscribeToMore]);
 
   if (loading) {
     return null;

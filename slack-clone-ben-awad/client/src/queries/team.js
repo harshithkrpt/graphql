@@ -24,6 +24,35 @@ export const ME_QUERY = gql`
         id
         name
         admin
+        directMessageMembers {
+          id
+          username
+        }
+        channels {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
+export const DIRECT_MESSAGE_ME_QUERY = gql`
+  query($userId: Int!) {
+    getUser(userId: $userId) {
+      username
+    }
+    me {
+      id
+      username
+      teams {
+        id
+        name
+        admin
+        directMessageMembers {
+          id
+          username
+        }
         channels {
           id
           name

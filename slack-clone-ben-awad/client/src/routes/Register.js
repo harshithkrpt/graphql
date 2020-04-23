@@ -38,7 +38,7 @@ const Register = (props) => {
     const { ok, errors } = res.data.register;
 
     if (ok) {
-      props.history.push("/");
+      props.history.push("/login");
     } else {
       const err = {};
       errors.forEach(({ path, message }) => {

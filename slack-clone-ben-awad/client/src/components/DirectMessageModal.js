@@ -1,94 +1,81 @@
-import React from "react";
+import React, { useState } from "react";
 import { withRouter } from "react-router-dom";
+import findIndex from "lodash/findIndex";
+import { Modal, Button, Form } from "semantic-ui-react";
 
-import { Modal, Button, Input, Form } from "semantic-ui-react";
-import Downshift from "downshift";
+import { GET_OR_CREATE_CHANNEL } from "../queries/user";
+import { ME_QUERY } from "../queries/team";
+import { useMutation } from "@apollo/react-hooks";
+import MultiSelectUsers from "./MultiSelectUsers";
 
-import { GET_TEAM_MEMBERS_QUERY } from "../queries/user";
-import { useQuery } from "@apollo/react-hooks";
+const DirectMessageModal = ({
+  open,
+  onClose,
+  teamId,
+  currentUserId,
+  history,
+}) => {
+  const [members, setMembers] = useState([]);
+  const [getOrCreateChannel, { loading }] = useMutation(GET_OR_CREATE_CHANNEL);
 
-const DirectMessageModal = ({ open, onClose, teamId, history }) => {
-  const { data, loading } = useQuery(GET_TEAM_MEMBERS_QUERY, {
-    variables: {
-      teamId: parseInt(teamId, 10),
-    },
-  });
+  const handleSubmit = async () => {
+    await getOrCreateChannel({
+      variables: {
+        teamId: parseInt(teamId, 10),
+        members,
+      },
+      update: (store, { data: { getOrCreateChannel } }) => {
+        const { id, name } = getOrCreateChannel;
+        const data = store.readQuery({ query: ME_QUERY });
+        const teamIdx = findIndex(data.me.teams, ["id", teamId]);
+        const notInChannelList = data.me.teams[teamIdx].channels.every(
+          (c) => c.id !== id
+        );
+        if (notInChannelList) {
+          data.me.teams[teamIdx].channels.push({
+            id,
+            name,
+            dm: true,
+            __typename: "Channel",
+          });
+          store.writeQuery({ query: ME_QUERY, data });
+        }
+        history.push(`/viewteam/${teamId}/${id}`);
+      },
+    });
 
-  if (loading) {
-    return null;
-  }
-
-  const { getTeamMembers } = data;
+    setMembers([]);
+    onClose();
+  };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <Modal.Header>Search Users</Modal.Header>
+    <Modal
+      open={open}
+      onClose={() => {
+        setMembers("");
+        onClose();
+      }}
+    >
+      <Modal.Header>Direct Messaging</Modal.Header>
       <Modal.Content>
         <Form>
           <Form.Field>
-            <Downshift
-              onChange={(selection) => {
-                history.push(`/viewteam/user/${teamId}/${selection.id}`);
-                onClose();
-              }}
-              itemToString={(item) => (item ? item.username : "")}
-            >
-              {({
-                getInputProps,
-                getItemProps,
-                getMenuProps,
-                isOpen,
-                inputValue,
-                highlightedIndex,
-                selectedItem,
-                getRootProps,
-              }) => (
-                <div>
-                  <div
-                    style={{ display: "inline-block" }}
-                    {...getRootProps({}, { suppressRefError: true })}
-                  >
-                    <Input
-                      {...getInputProps({
-                        placeholder: "Enter UserName",
-                      })}
-                    />
-                  </div>
-                  <ul {...getMenuProps()}>
-                    {isOpen
-                      ? getTeamMembers
-                          .filter(
-                            (item) =>
-                              !inputValue || item.username.includes(inputValue)
-                          )
-                          .map((item, index) => (
-                            <li
-                              {...getItemProps({
-                                key: item.id,
-                                index,
-                                item,
-                                style: {
-                                  backgroundColor:
-                                    highlightedIndex === index
-                                      ? "lightgray"
-                                      : "white",
-                                  fontWeight:
-                                    selectedItem === item ? "bold" : "normal",
-                                },
-                              })}
-                            >
-                              {item.username}
-                            </li>
-                          ))
-                      : null}
-                  </ul>
-                </div>
-              )}
-            </Downshift>
+            <MultiSelectUsers
+              handleChange={(e, { value }) => setMembers(value)}
+              teamId={parseInt(teamId, 10)}
+              placeholder="Select Members to invite"
+              currentUserId={currentUserId}
+              value={members}
+            />
           </Form.Field>
-          <Button onClick={onClose} fluid>
-            Cancel
-          </Button>
+          <Form.Group>
+            <Button disabled={loading} onClick={onClose} fluid>
+              Cancel
+            </Button>
+            <Button disabled={loading} onClick={handleSubmit} fluid>
+              Start Messaging
+            </Button>
+          </Form.Group>
         </Form>
       </Modal.Content>
     </Modal>

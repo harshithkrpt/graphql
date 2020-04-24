@@ -37,14 +37,25 @@ export const CREATE_DIRECT_MESSAGE_MUTATION = gql`
   }
 `;
 
+export const GET_OR_CREATE_CHANNEL = gql`
+  mutation($teamId: Int!, $members: [Int!]!) {
+    getOrCreateChannel(teamId: $teamId, members: $members) {
+      id
+      name
+    }
+  }
+`;
+
 export const MESSAGES_QUERY = gql`
-  query($channelId: Int!) {
-    messages(channelId: $channelId) {
+  query($offset: Int!, $channelId: Int!) {
+    messages(offset: $offset, channelId: $channelId) {
       id
       text
       user {
         username
       }
+      url
+      filetype
       createdAt
     }
   }
@@ -71,6 +82,8 @@ export const CREATE_NEW_MESSAGE_SUBSCRIPTION = gql`
       user {
         username
       }
+      url
+      filetype
       createdAt
     }
   }

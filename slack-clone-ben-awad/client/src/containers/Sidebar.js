@@ -5,7 +5,7 @@ import AddChannelModal from "../components/AddChannelModal";
 import InvitePeopleModal from "../components/InvitePeopleModal";
 import DirectMessageModal from "../components/DirectMessageModal";
 
-const Sidebar = ({ teams, team, username }) => {
+const Sidebar = ({ teams, team, username, currentUserId }) => {
   const [openAddChannelModal, setOpenAddChannelModal] = useState(false);
   const [openInvitePeopleModal, setOpenInvitePeopleModal] = useState(false);
   const [openDirectMessageModal, setOpenDirectMessageModal] = useState(false);
@@ -22,6 +22,17 @@ const Sidebar = ({ teams, team, username }) => {
     setOpenDirectMessageModal(!openDirectMessageModal);
   };
 
+  const regularChannels = [];
+  const dmChannels = [];
+
+  team.channels.forEach((c) => {
+    if (c.dm) {
+      dmChannels.push(c);
+    } else {
+      regularChannels.push(c);
+    }
+  });
+
   return (
     <>
       <Teams teams={teams} />
@@ -30,9 +41,9 @@ const Sidebar = ({ teams, team, username }) => {
         username={username}
         teamId={team.id}
         owner={team.owner}
-        channels={team.channels}
+        channels={regularChannels}
         isOwner={team.admin}
-        users={team.directMessageMembers}
+        dmChannels={dmChannels}
         onAddChannelClick={toggleAddChannelModal}
         onInvitePeopleClick={toggleInvitePeopleModal}
         onDirectMessageClick={toggleDirectMessageModal}
@@ -41,6 +52,7 @@ const Sidebar = ({ teams, team, username }) => {
         teamId={team.id}
         open={openAddChannelModal}
         onClose={toggleAddChannelModal}
+        currentUserId={currentUserId}
       />
       <InvitePeopleModal
         teamId={team.id}
@@ -48,6 +60,7 @@ const Sidebar = ({ teams, team, username }) => {
         onClose={toggleInvitePeopleModal}
       />
       <DirectMessageModal
+        currentUserId={currentUserId}
         teamId={team.id}
         open={openDirectMessageModal}
         onClose={toggleDirectMessageModal}

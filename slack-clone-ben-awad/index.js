@@ -120,13 +120,15 @@ app.use(
   "/graphiql",
   graphiqlExpress({
     endpointURL: graphqlEndpoint,
-    subscriptionsEndpoint: "ws://localhost:8081/subscriptions",
+    subscriptionsEndpoint: "ws://localhost:8080/subscriptions",
   })
 );
 
+app.use("/files", express.static("files"));
+
 const server = createServer(app);
 
-models.sequelize.sync({}).then(() => {
+models.sequelize.sync().then(() => {
   server.listen(8080, () => {
     // eslint-disable-next-line no-new
     new SubscriptionServer(

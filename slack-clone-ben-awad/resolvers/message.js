@@ -17,6 +17,8 @@ module.exports = {
     },
   },
   Message: {
+    url: (parent) =>
+      parent.url ? `http://localhost:8080/${parent.url}` : parent.url,
     user: async ({ user, userId }, args, { models }) => {
       if (user) return user;
 
@@ -25,9 +27,27 @@ module.exports = {
   },
   Query: {
     messages: requiresAuth.createResolver(
-      async (_, { channelId }, { models }) => {
+      async (_, { channelId, offset }, { models, user }) => {
+        const channel = await models.Channel.findOne(
+          { where: { id: channelId } },
+          { raw: true }
+        );
+        if (!channel.public) {
+          const member = await models.PCMember.findOne({
+            where: { channelId: channelId, userId: user.id },
+          });
+
+          if (!member) {
+            throw new Error("Not Authorized");
+          }
+        }
         return models.Message.findAll(
-          { order: [["createdAt", "ASC"]], where: { channelId } },
+          {
+            order: [["createdAt", "DESC"]],
+            where: { channelId },
+            limit: 35,
+            offset,
+          },
           { raw: true }
         );
       }

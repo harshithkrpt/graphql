@@ -23,19 +23,11 @@ const ViewTeam = ({
     CREATE_MESSAGE_MUTATION
   );
 
-  const handleSubmit = async (text) => {
-    try {
-      await createMessage({ variables: { text, channelId: channel.id } });
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   if (loading) {
     return "Loading";
   }
 
-  const { teams, username } = data.me;
+  const { id: currentUserId, teams, username } = data.me;
 
   if (!teams.length) {
     return <Redirect to="/createteam" />;
@@ -54,29 +46,36 @@ const ViewTeam = ({
     : 0;
   const channel = teamIdx === -1 ? team.channels[0] : team.channels[channelIdx];
 
-  return (
-    !loading && (
-      <AppLayout>
-        <Sidebar
-          teams={teams.map((t) => ({
-            id: t.id,
-            letter: t.name.charAt(0).toUpperCase(),
-          }))}
-          currentTeamId={teamId}
-          team={team}
-          username={username}
-        />
-        {channel && <Header channelName={channel.name} />}
-        {channel && <MessageContainer channelId={channel.id} />}
+  const handleSubmit = async (text, channelId) => {
+    try {
+      await createMessage({ variables: { text, channelId } });
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
-        <SendMessage
-          isLoading={createMessageInfo.loading}
-          onSubmit={handleSubmit}
-          placeholder={channel.name}
-          channelId={channel.id}
-        />
-      </AppLayout>
-    )
+  return (
+    <AppLayout>
+      <Sidebar
+        teams={teams.map((t) => ({
+          id: t.id,
+          letter: t.name.charAt(0).toUpperCase(),
+        }))}
+        currentTeamId={teamId}
+        team={team}
+        username={username}
+        currentUserId={currentUserId}
+      />
+      {channel && <Header channelName={channel.name} />}
+      {channel && <MessageContainer channelId={channel.id} />}
+
+      <SendMessage
+        isLoading={createMessageInfo.loading}
+        onSubmit={handleSubmit}
+        placeholder={channel.name}
+        channelId={channel.id}
+      />
+    </AppLayout>
   );
 };
 

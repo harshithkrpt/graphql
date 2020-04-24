@@ -24,12 +24,13 @@ const CreateTeam = (props) => {
   const [createTeam, { loading }] = useMutation(CREATETEAM);
 
   const handleChange = (e) => {
+    setErrors({ nameError: "" });
     setValues({ ...values, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     // Clear Errors
-    setErrors({ nameError: "" });
+
     const { name } = values;
 
     let res = null;
@@ -37,14 +38,16 @@ const CreateTeam = (props) => {
       res = await createTeam({ variables: { name } });
     } catch (e) {
       props.history.push("/login");
-      console.log("hn");
-      return;
     }
+
+    if (!res.data.createTeam) {
+      props.history.push("/login");
+    }
+
     const { ok, errors, team } = res.data.createTeam;
 
     if (ok) {
       props.history.push(`/viewteam/${team.id}`);
-      return;
     } else {
       const err = {};
       errors.forEach(({ path, message }) => {

@@ -9,17 +9,16 @@ const CREATE_FILE_MSG_MUTATION = gql`
   }
 `;
 
-const FileUpload = ({ children, disableClicking, channelId }) => {
+const FileUpload = ({ children, disableClicking, channelId, style = {} }) => {
   const [createMessage] = useMutation(CREATE_FILE_MSG_MUTATION);
   const onDrop = useCallback(
     async ([file]) => {
-      const res = await createMessage({
+      await createMessage({
         variables: {
           channelId,
           file,
         },
       });
-      console.log(res);
     },
     [createMessage, channelId]
   );
@@ -28,7 +27,7 @@ const FileUpload = ({ children, disableClicking, channelId }) => {
     noClick: disableClicking,
   });
   return (
-    <div {...getRootProps()}>
+    <div {...getRootProps()} style={style}>
       <input {...getInputProps()} />
       {children}
     </div>

@@ -31,6 +31,7 @@ export const ME_QUERY = gql`
         channels {
           id
           name
+          dm
         }
       }
     }
@@ -63,12 +64,18 @@ export const DIRECT_MESSAGE_ME_QUERY = gql`
 `;
 
 export const CREATECHANNEL = gql`
-  mutation($teamId: Int!, $name: String!) {
-    createChannel(teamId: $teamId, name: $name) {
+  mutation($teamId: Int!, $name: String!, $public: Boolean, $members: [Int!]) {
+    createChannel(
+      teamId: $teamId
+      name: $name
+      public: $public
+      members: $members
+    ) {
       ok
       channel {
         id
         name
+        dm
       }
     }
   }

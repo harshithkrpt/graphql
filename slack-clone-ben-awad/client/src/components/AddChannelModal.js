@@ -1,12 +1,15 @@
 import React, { useState } from "react";
-import { Modal, Button, Input, Form } from "semantic-ui-react";
+import { Modal, Button, Input, Form, Checkbox } from "semantic-ui-react";
 
 import { CREATECHANNEL, ME_QUERY } from "../queries/team";
 import { useMutation } from "@apollo/react-hooks";
 import findIndex from "lodash/findIndex";
+import MultiSelectUsers from "../components/MultiSelectUsers";
 
-const AddChannelModal = ({ open, onClose, teamId }) => {
+const AddChannelModal = ({ open, onClose, teamId, currentUserId }) => {
   const [name, setName] = useState("");
+  const [isPublic, setIsPublic] = useState(true);
+  const [members, setMembers] = useState([]);
   const [createChannel, { loading }] = useMutation(CREATECHANNEL);
   const handleChange = (e) => {
     setName(e.target.value);
@@ -14,7 +17,12 @@ const AddChannelModal = ({ open, onClose, teamId }) => {
 
   const handleSubmit = async (e) => {
     await createChannel({
-      variables: { teamId: parseInt(teamId, 10), name },
+      variables: {
+        teamId: parseInt(teamId, 10),
+        name,
+        public: isPublic,
+        members,
+      },
       optimisticResponse: {
         createChannel: {
           __typename: "Mutation",
@@ -23,6 +31,7 @@ const AddChannelModal = ({ open, onClose, teamId }) => {
             __typename: "Channel",
             id: -1,
             name: name,
+            dm: false,
           },
         },
       },
@@ -31,13 +40,13 @@ const AddChannelModal = ({ open, onClose, teamId }) => {
         if (!ok) {
           return;
         }
+
         const data = store.readQuery({ query: ME_QUERY });
         const teamIdx = findIndex(data.me.teams, ["id", teamId]);
         data.me.teams[teamIdx].channels.push(channel);
         store.writeQuery({ query: ME_QUERY, data });
       },
     });
-    setName("");
     onClose();
   };
 
@@ -56,10 +65,31 @@ const AddChannelModal = ({ open, onClose, teamId }) => {
               value={name}
               onChange={handleChange}
               fluid
+              name="name"
               placeholder="Channel Name"
             />
           </Form.Field>
-          <Form.Group>
+          <Form.Field>
+            <Checkbox
+              checked={!isPublic}
+              toggle
+              label="Private"
+              onChange={(e, { checked }) => setIsPublic(!checked)}
+            />
+          </Form.Field>
+          {isPublic ? null : (
+            <Form.Field>
+              <MultiSelectUsers
+                handleChange={(e, { value }) => setMembers(value)}
+                teamId={parseInt(teamId, 10)}
+                placeholder="Select Members to invite"
+                currentUserId={currentUserId}
+                value={members}
+              />
+            </Form.Field>
+          )}
+
+          <Form.Group widths="equal">
             <Button onClick={handleClose} fluid>
               Cancel
             </Button>

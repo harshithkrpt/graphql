@@ -21,7 +21,6 @@ type Subscription {
 type Query {
     messages(offset:Int!,channelId: Int!): [Message!]!
 }
-
 type Mutation {
     createMessage(channelId:Int!,text:String,file:File): Boolean!  
 }

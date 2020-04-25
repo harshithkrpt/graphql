@@ -14,6 +14,8 @@ const { createServer } = require("http");
 const { execute, subscribe } = require("graphql");
 const { SubscriptionServer } = require("subscriptions-transport-ws");
 const formidable = require("formidable");
+const DataLoader = require("dataloader");
+const { channelBatcher } = require("./batchFunctions");
 
 const models = require("./models");
 const { refreshTokens } = require("./utils/auth");
@@ -112,6 +114,9 @@ app.use(
       user: req.user,
       SECRET,
       SECRET2,
+      channelLoader: new DataLoader((ids) =>
+        channelBatcher(ids, models, req.user)
+      ),
     },
   }))
 );

@@ -79,7 +79,7 @@ const MessageContainer = ({ channelId }) => {
       disableClicking={true}
     >
       <Comment.Group>
-        {hasMoreItems && (
+        {hasMoreItems && messages.length >= 35 && (
           <Button
             onClick={(e) => {
               fetchMore({

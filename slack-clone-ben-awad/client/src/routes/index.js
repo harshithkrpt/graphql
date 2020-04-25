@@ -18,7 +18,10 @@ const isAuthenticated = () => {
   const refreshToken = localStorage.getItem(LOCAL_STORAGE_REFRESH_TOKEN);
   try {
     decode(token);
-    decode(refreshToken);
+    const { exp } = decode(refreshToken);
+    if (Date.now() / 1000 > exp) {
+      return false;
+    }
   } catch (e) {
     return false;
   }

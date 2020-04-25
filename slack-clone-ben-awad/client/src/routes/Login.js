@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { wsLink } from "../apollo";
 
 import {
   Container,
@@ -44,6 +45,7 @@ const Login = (props) => {
     if (ok) {
       localStorage.setItem(LOCAL_STORAGE_TOKEN, token);
       localStorage.setItem(LOCAL_STORAGE_REFRESH_TOKEN, refreshToken);
+      wsLink.subscriptionClient.tryReconnect();
       props.history.push("/viewteam");
     } else {
       const err = {};

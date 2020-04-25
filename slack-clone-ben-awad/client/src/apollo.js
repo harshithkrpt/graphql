@@ -52,10 +52,11 @@ const httpLink = createFileLink({
 });
 
 // WS LINK
-const wsLink = new WebSocketLink({
+export const wsLink = new WebSocketLink({
   uri: `ws://localhost:8080/subscriptions`,
   options: {
     reconnect: true,
+    lazy: true,
     connectionParams: {
       token: localStorage.getItem(LOCAL_STORAGE_TOKEN),
       refreshToken: localStorage.getItem(LOCAL_STORAGE_REFRESH_TOKEN),
